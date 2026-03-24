@@ -4,12 +4,15 @@ IStudentRepository studentRepo = new InMemoryStudentRepository();
 IStudentService studentService = new StudentService(studentRepo);
 ICourseRepository courseRepo = new InMemoryCourseRepository();
 ICourseService courseService = new CourseService(courseRepo);
+IEnrollmentRepository enrollmentRepo = new InMemoryEnrollmentRepository();
+IEnrollmentService enrollmentService = new EnrollmentService(enrollmentRepo);
+
 //The service doesn't know or care about the storage implementation
 
-RunMainMenu(studentService, courseService);
+RunMainMenu(studentService, courseService, enrollmentService);
 
 //switch case choice for user to select options
-static void RunMainMenu(IStudentService studentService, ICourseService courseService)
+static void RunMainMenu(IStudentService studentService, ICourseService courseService, IEnrollmentService enrollmentService)
 {
     Console.WriteLine("Welcome to the Student Management System!");
 
@@ -40,7 +43,7 @@ static void RunMainMenu(IStudentService studentService, ICourseService courseSer
                 break;
             case 3:
                 Console.WriteLine("You selected Enrollment operations.");
-                //call enrollment operations method
+                EnrollmentMenu(enrollmentService);
                 break;
             case 4:
                 Console.WriteLine("You will exit the application. Goodbye!");
@@ -262,4 +265,75 @@ static void CourseMenu(ICourseService courseService)
         }
     }
 
+}
+
+static void EnrollmentMenu(IEnrollmentService enrollmentService)
+{
+    //similar to student and course menu but for enrollments
+    bool exitEnrollmentMenu = false;
+
+    while (!exitEnrollmentMenu)
+    {
+        Console.WriteLine("Please select an enrollment operation:");
+        Console.WriteLine("1. Enroll a student in a course");
+        Console.WriteLine("2. List all enrollments");
+        Console.WriteLine("3. Back to main menu");
+
+        if (!int.TryParse(Console.ReadLine(), out int enrollmentChoice))
+        {
+            Console.WriteLine("Invalid choice. Number required.");
+            return;
+        }
+
+        switch (enrollmentChoice)
+        {
+            case 1:
+                Console.WriteLine("You selected Enroll a student in a course.");
+                //call enroll student method
+                Console.Write("Enter Student ID: ");
+                if (!int.TryParse(Console.ReadLine(), out int studentId))
+                {
+                    Console.WriteLine("Invalid Student ID.");
+                    break;
+                }
+                Console.Write("Enter Course Code: ");
+                string? courseCode = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(courseCode))
+                {
+                    Console.WriteLine("Invalid Course Code.");
+                    break;
+                }
+                var enrollment = enrollmentService.Enroll(studentId, courseCode.Trim());
+                if (enrollment != null)
+                    Console.WriteLine("Student enrolled successfully.");
+                else
+                    Console.WriteLine("Enrollment failed. Check if student ID and course code are correct.");
+                break;
+
+            case 2:
+                Console.WriteLine("You selected List all enrollments.");
+                var enrollments = enrollmentService.ListAll();
+                if (enrollments.Count == 0)
+                    Console.WriteLine("No enrollments available.");
+                else
+                {
+                    Console.WriteLine("Current enrollments:");
+                    foreach (var e in enrollments)
+                    {
+                        Console.WriteLine($"Student ID {e.StudentId} is enrolled in Course {e.CourseCode} with grade {e.CourseGrade}");
+                    }
+                }
+                break;
+
+            case 3:
+                Console.WriteLine("Returning to main menu.");
+                exitEnrollmentMenu = true;
+                break;
+
+            default:
+                Console.WriteLine("Invalid choice. Please select a valid option.");
+                break;
+
+        }
+    }
 }

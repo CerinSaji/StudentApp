@@ -58,7 +58,7 @@ public class Enrollment
 {
     public int StudentId { get; init; }
     public required string CourseCode { get; init; }
-    public required string CourseGrade { get; set; }
+    public string CourseGrade { get; set; }
 }
 
 public interface IStudentRepository
@@ -197,4 +197,51 @@ public class CourseService : ICourseService
     public bool Delete(string courseCode) => _repo.Remove(courseCode);
     public Course? Get(string courseCode) => _repo.Get(courseCode);
     public IReadOnlyList<Course> ListAll() => _repo.GetAll();
+}
+
+public interface IEnrollmentRepository
+{
+    Enrollment Add(Enrollment enrollment);
+    Enrollment? Get(int studentId, string courseCode);
+
+    public IReadOnlyList<Enrollment> GetAll();
+}
+
+public class InMemoryEnrollmentRepository : IEnrollmentRepository
+{
+    private readonly List<Enrollment> _store = new();
+
+    public Enrollment Add(Enrollment enrollment)
+    {
+        _store.Add(enrollment);
+        return enrollment;
+    }
+
+    public Enrollment? Get(int studentId, string courseCode) => _store.FirstOrDefault(e => e.StudentId == studentId && e.CourseCode == courseCode);
+
+    public IReadOnlyList<Enrollment> GetAll() => _store.ToList();  
+}
+
+public interface IEnrollmentService
+{
+    Enrollment Enroll(int studentId, string courseCode);
+    Enrollment? GetEnrollment(int studentId, string courseCode);
+    //list all enrollemnts
+    IReadOnlyList<Enrollment> ListAll();
+}
+
+public class EnrollmentService : IEnrollmentService
+{
+    private readonly IEnrollmentRepository _repo;
+    public EnrollmentService(IEnrollmentRepository repo) => _repo = repo;
+
+    public Enrollment Enroll(int studentId, string courseCode)
+    {
+        var enrollment = new Enrollment { StudentId = studentId, CourseCode = courseCode};
+        return _repo.Add(enrollment);
+    }
+
+    public Enrollment? GetEnrollment(int studentId, string courseCode) => _repo.Get(studentId, courseCode);
+
+    public IReadOnlyList<Enrollment> ListAll() => _repo.GetAll();
 }
