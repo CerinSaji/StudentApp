@@ -1,6 +1,8 @@
 using System.Globalization;
 
 namespace StudentApp.UI;
+using StudentApp.Models;
+using StudentApp.Services;
 
 public class CourseMenu : IMenu
 {

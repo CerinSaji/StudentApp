@@ -1,4 +1,5 @@
 namespace StudentApp.UI;
+using StudentApp.Services;
 
 public class MainMenu : IMenu
 {
@@ -24,14 +25,16 @@ public class MainMenu : IMenu
             Console.WriteLine("1. Student operations");
             Console.WriteLine("2. Course operations");
             Console.WriteLine("3. Enrollment operations");
-            Console.WriteLine("4. Exit");
+            Console.WriteLine("4. Reports");
+            Console.WriteLine("5. Exit");
 
-            if (!int.TryParse(Console.ReadLine(), out int choice))
+            /*if (!int.TryParse(Console.ReadLine(), out int choice))
             {
                 Console.WriteLine("Invalid input. Number required.");
                 return;
-            }
+            }*/
             
+            int choice = int.TryParse(Console.ReadLine(), out int parsedChoice) ? parsedChoice : 0;
             switch (choice)
             {
                 case 1:
@@ -50,6 +53,11 @@ public class MainMenu : IMenu
                     enrollmentMenu.Display();
                     break;
                 case 4:
+                    Console.WriteLine("You selected Reports.");
+                    var reportsMenu = new ReportsMenu(_courseService, _enrollmentService);
+                    reportsMenu.Display();
+                    break;
+                case 5:
                     Console.WriteLine("You will exit the application. Goodbye!");
                     exit = true;
                     break;

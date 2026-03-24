@@ -1,5 +1,7 @@
 ﻿using StudentApp;
 using StudentApp.UI;
+using StudentApp.Repositories;
+using StudentApp.Services;
 
 // Initialize repositories
 IStudentRepository studentRepo = new InMemoryStudentRepository();
