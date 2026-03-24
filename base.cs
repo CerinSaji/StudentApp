@@ -57,8 +57,8 @@ public class Course
 public class Enrollment
 {
     public int StudentId { get; init; }
-    public string CourseCode { get; init; }
-    public string CourseGrade { get; set; }
+    public required string CourseCode { get; init; }
+    public required string CourseGrade { get; set; }
 }
 
 public interface IStudentRepository
@@ -73,7 +73,7 @@ public interface IStudentRepository
 public class InMemoryStudentRepository : IStudentRepository
 {
     private readonly Dictionary<int, Student> _store = new();
-    private int _nextId = 1;
+    static int _nextId = 1;
 
     public Student Add(Student student)
     {
@@ -102,7 +102,8 @@ public interface IStudentService
     bool UpdateEmail(int studentId, string newEmail);
     bool Delete(int studentId);
     Student? Get(int studentId);
-    IReadOnlyList<Student> ListAll();
+    IReadOnlyList<Student> ListAllInfo(int studentId); 
+    IReadOnlyList<Student> ListAll(); //added this method to list all students, not just by id
 }
 
 public class StudentService : IStudentService
@@ -126,5 +127,74 @@ public class StudentService : IStudentService
 
     public bool Delete(int studentId) => _repo.Remove(studentId);
     public Student? Get(int studentId) => _repo.Get(studentId);
+    public IReadOnlyList<Student> ListAllInfo(int studentId) => _repo.GetAll().Where(s => s.StudentId == studentId).ToList();
+
     public IReadOnlyList<Student> ListAll() => _repo.GetAll();
+}
+
+public interface ICourseRepository
+{
+    Course Add(Course course);
+    Course? Get(string courseCode);
+    bool Update(Course course);
+    bool Remove(string courseCode);
+    IReadOnlyList<Course> GetAll();
+}
+
+public class InMemoryCourseRepository : ICourseRepository
+{
+    private readonly Dictionary<string, Course> _store = new();
+
+    public Course Add(Course course)
+    {
+        _store[course.CourseCode] = course;
+        return course;
+    }
+
+    public Course? Get(string courseCode) => _store.TryGetValue(courseCode, out var c) ? c : null;
+
+    //what is the appropriate access modifier for this method
+    public IReadOnlyList<Course> GetAll() => _store.Values.ToList();
+
+    public bool Update(Course course)
+    {
+        if (!_store.ContainsKey(course.CourseCode)) return false;
+        _store[course.CourseCode] = course;
+        return true;
+    }
+
+    public bool Remove(string courseCode) => _store.Remove(courseCode);
+}
+
+public interface ICourseService
+{
+    Course Create(string name, string code, int credits, string instructor);
+    bool UpdateInstructor(string courseCode, string newInstructor);
+    bool Delete(string courseCode);
+    Course? Get(string courseCode);
+    IReadOnlyList<Course> ListAll();
+}
+
+public class CourseService : ICourseService
+{
+    private readonly ICourseRepository _repo;
+    public CourseService(ICourseRepository repo) => _repo = repo;
+
+    public Course Create(string name, string code, int credits, string instructor)
+    {
+        var course = new Course(name, code, credits, instructor);
+        return _repo.Add(course);
+    }
+
+    public bool UpdateInstructor(string courseCode, string newInstructor)
+    {
+        var existing = _repo.Get(courseCode);
+        if (existing == null) return false;
+        var updated = new Course(existing.CourseName, existing.CourseCode, existing.CourseCredits, newInstructor);
+        return _repo.Update(updated);
+    }
+
+    public bool Delete(string courseCode) => _repo.Remove(courseCode);
+    public Course? Get(string courseCode) => _repo.Get(courseCode);
+    public IReadOnlyList<Course> ListAll() => _repo.GetAll();
 }

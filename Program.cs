@@ -2,11 +2,14 @@
 
 IStudentRepository studentRepo = new InMemoryStudentRepository();
 IStudentService studentService = new StudentService(studentRepo);
+ICourseRepository courseRepo = new InMemoryCourseRepository();
+ICourseService courseService = new CourseService(courseRepo);
+//The service doesn't know or care about the storage implementation
 
-RunMainMenu(studentService);
+RunMainMenu(studentService, courseService);
 
 //switch case choice for user to select options
-static void RunMainMenu(IStudentService studentService)
+static void RunMainMenu(IStudentService studentService, ICourseService courseService)
 {
     Console.WriteLine("Welcome to the Student Management System!");
 
@@ -33,7 +36,7 @@ static void RunMainMenu(IStudentService studentService)
                 break;
             case 2:
                 Console.WriteLine("You selected Course operations.");
-                //call course operations method
+                CourseMenu(courseService);
                 break;
             case 3:
                 Console.WriteLine("You selected Enrollment operations.");
@@ -79,9 +82,7 @@ static void StudentMenu(IStudentService studentService)
                 string? emailId = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(emailId))
-                {
                     Console.WriteLine("Full name and email are required.");
-                }
                 else
                 {
                     var added = studentService.Create(fullName.Trim(), emailId.Trim());
@@ -97,6 +98,18 @@ static void StudentMenu(IStudentService studentService)
 
                 if (int.TryParse(Console.ReadLine(), out int id))
                 {
+                    //display current details for reference
+                    var students = studentService.ListAllInfo(id);
+                    if (students == null || students.Count == 0)
+                    {
+                        Console.WriteLine("Student not found.");
+                        break;
+                    }
+                    var student = students[0]; //returns in array/list format so get item at index 0?
+                    Console.WriteLine($"Current details for Student ID {id}:");
+                    Console.WriteLine($"Name: {student.StudentName}");
+                    Console.WriteLine($"Email: {student.StudentEmail}");
+
                     Console.Write("Enter new email: ");
                     string? newEmail = Console.ReadLine();
 
@@ -119,6 +132,16 @@ static void StudentMenu(IStudentService studentService)
             case 3:
                 Console.WriteLine("You selected Remove a student.");
                 //call remove student method
+                Console.Write("Enter Student ID: ");
+                if (int.TryParse(Console.ReadLine(), out int removeId))
+                {
+                    if (studentService.Delete(removeId))
+                        Console.WriteLine("Student removed successfully.");
+                    else
+                        Console.WriteLine("Student not found.");
+                }
+                else
+                    Console.WriteLine("Invalid Student ID.");
                 break;
             
             case 4:
@@ -132,4 +155,111 @@ static void StudentMenu(IStudentService studentService)
 
         }
     }
+}
+
+static void CourseMenu(ICourseService courseService)
+{
+    //similar to student menu but for courses   
+    bool exitCourseMenu = false;
+    while (!exitCourseMenu)
+    {
+        Console.WriteLine("Please select a course operation:");
+        Console.WriteLine("1. Add a course");
+        Console.WriteLine("2. Update a course");
+        Console.WriteLine("3. Remove a course");
+        Console.WriteLine("4. List all courses");
+        Console.WriteLine("5. Back to main menu");
+
+        if (!int.TryParse(Console.ReadLine(), out int courseChoice))
+        {
+            Console.WriteLine("Invalid choice. Number required.");
+            return;
+        }
+
+        switch (courseChoice)
+        {
+            case 1:
+                Console.WriteLine("You selected Add a course.");
+                Console.Write("Course name: ");
+                string? courseName = Console.ReadLine();
+                Console.Write("Course code: ");
+                string? courseCode = Console.ReadLine();
+                Console.Write("Course credits: ");
+                if (!int.TryParse(Console.ReadLine(), out int courseCredits))
+                {
+                    Console.WriteLine("Invalid number of credits.");
+                    break;
+                }
+                Console.Write("Instructor: ");
+                string? instructor = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(courseName) || string.IsNullOrWhiteSpace(courseCode) || string.IsNullOrWhiteSpace(instructor))
+                    Console.WriteLine("All fields are required.");
+                else
+                {
+                    var added = courseService.Create(courseName.Trim(), courseCode.Trim(), courseCredits, instructor.Trim());
+                    Console.WriteLine($"Added Course {added.CourseCode}: {added.CourseName}");
+                }
+
+                break;
+
+            case 2:
+                Console.WriteLine("You selected Update a course.");
+                //call update course method
+                Console.Write("Enter Course Code: ");
+
+                if (string.IsNullOrWhiteSpace(Console.ReadLine()))
+                {
+                    Console.WriteLine("Invalid Course Code.");
+                    break;
+                }
+
+                // Implementation for updating a course would go here
+
+                break;
+
+            case 3:
+                Console.WriteLine("You selected Remove a course.");
+                //call remove course method
+                Console.Write("Enter Course Code: ");
+                string? removeCourseCode = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(removeCourseCode))
+                {
+                    Console.WriteLine("Invalid Course Code.");
+                    break;
+                }
+                if (courseService.Delete(removeCourseCode.Trim()))
+                    Console.WriteLine("Course removed successfully.");
+                else
+                    Console.WriteLine("Course not found.");
+
+                break;
+            
+            case 4:
+                Console.WriteLine("You selected List all courses.");
+                var courses = courseService.ListAll();
+                if (courses.Count == 0)
+                    Console.WriteLine("No courses available.");
+                else
+                {
+                    Console.WriteLine("Available courses:");
+                    foreach (var course in courses)
+                    {
+                        Console.WriteLine($"{course.CourseCode}: {course.CourseName} ({course.CourseCredits} credits) - Instructor: {course.CourseInstructor}");
+                    }
+                }
+                break;
+
+            case 5:
+                Console.WriteLine("Returning to main menu.");
+                exitCourseMenu = true;
+                break;
+
+            default:
+                Console.WriteLine("Invalid choice. Please select a valid option.");
+                break;
+
+        }
+    }
+
 }
