@@ -26,6 +26,11 @@ public class Student
         get => _studentEmail; set => _studentEmail = value;
     }
 
+    public List<string> CourseList
+    {
+        get => Courses; set => Courses = value;
+    }
+
     //constructor 
     public Student(int StudentId, string StudentName, string StudentEmail, string? EnrollmentDate = null)
     {
@@ -102,8 +107,9 @@ public interface IStudentService
     bool UpdateEmail(int studentId, string newEmail);
     bool Delete(int studentId);
     Student? Get(int studentId);
-    IReadOnlyList<Student> ListAllInfo(int studentId); 
+    IReadOnlyList<Student> ListStudentInfo(int studentId); 
     IReadOnlyList<Student> ListAll(); //added this method to list all students, not just by id
+    bool AddCourse(int studentId, string courseCode);
 }
 
 public class StudentService : IStudentService
@@ -127,9 +133,25 @@ public class StudentService : IStudentService
 
     public bool Delete(int studentId) => _repo.Remove(studentId);
     public Student? Get(int studentId) => _repo.Get(studentId);
-    public IReadOnlyList<Student> ListAllInfo(int studentId) => _repo.GetAll().Where(s => s.StudentId == studentId).ToList();
+    public IReadOnlyList<Student> ListStudentInfo(int studentId) => _repo.GetAll().Where(s => s.StudentId == studentId).ToList();
 
     public IReadOnlyList<Student> ListAll() => _repo.GetAll();
+
+    public bool AddCourse(int studentId, string courseCode)
+    {
+        var student = _repo.Get(studentId);
+        if (student == null) return false;
+        student.Courses.Add(courseCode);
+        return _repo.Update(student);
+    }
+
+    /*
+    public Enrollment Enroll(int studentId, string courseCode)
+    {
+        var enrollment = new Enrollment { StudentId = studentId, CourseCode = courseCode};
+        return _repo.Add(enrollment);
+    }
+    */
 }
 
 public interface ICourseRepository
@@ -170,6 +192,7 @@ public interface ICourseService
 {
     Course Create(string name, string code, int credits, string instructor);
     bool UpdateInstructor(string courseCode, string newInstructor);
+    bool UpdateCredits(string courseCode, int newCredits);
     bool Delete(string courseCode);
     Course? Get(string courseCode);
     IReadOnlyList<Course> ListAll();
@@ -191,6 +214,14 @@ public class CourseService : ICourseService
         var existing = _repo.Get(courseCode);
         if (existing == null) return false;
         var updated = new Course(existing.CourseName, existing.CourseCode, existing.CourseCredits, newInstructor);
+        return _repo.Update(updated);
+    }
+
+    public bool UpdateCredits(string courseCode, int newCredits)
+    {
+        var existing = _repo.Get(courseCode);
+        if (existing == null) return false;
+        var updated = new Course(existing.CourseName, existing.CourseCode, newCredits, existing.CourseInstructor);
         return _repo.Update(updated);
     }
 
