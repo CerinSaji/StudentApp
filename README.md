@@ -80,7 +80,7 @@ StudentApp/
   - `Models/` - Domain entities (Student, Course, Enrollment)
   - `Repositories/` - Data access layer (interfaces + in-memory implementations)
   - `Services/` - Business logic layer (interfaces + implementations)
-  - `UI/` - Presentation layer (menu classes implementing IMenu)
+  - `UI/` - Menu classes implementing IMenu
 - `Program.cs` minimal initialization only
 - Clean namespace organization with proper using directives
 - Dependency injection pattern throughout
