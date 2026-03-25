@@ -28,7 +28,6 @@ StudentApp/
 │   ├── EnrollmentMenu.cs
 │   └── ReportsMenu.cs
 ├── Program.cs                 # Application entry point
-├── base.cs                    # Shared utilities (currently minimal)
 ├── README.md                  # This file
 └── StudentApp.csproj          # Project configuration
 ```
