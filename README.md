@@ -75,20 +75,12 @@ StudentApp/
   - Uses LINQ grouping for efficient data aggregation
   - Reports can be extended with additional views
 
-### 6. Architecture updates (refactor)
-- **Modular structure** with clear separation of concerns:
-  - `Models/` - Domain entities (Student, Course, Enrollment)
-  - `Repositories/` - Data access layer (interfaces + in-memory implementations)
-  - `Services/` - Business logic layer (interfaces + implementations)
-  - `UI/` - Menu classes implementing IMenu
-- `Program.cs` minimal initialization only
-- Clean namespace organization with proper using directives
-- Dependency injection pattern throughout
-
-### 7. Error handling improvements
-- Input parsing validation on numeric selections
-- Checking null / whitespace for required fields
-- User-friendly messages for not found / invalid entries
+### 6. Architecture
+- `Models/` - Domain entities (Student, Course, Enrollment)
+- `Repositories/` - Data access layer (interfaces + in-memory implementations)
+- `Services/` - Business logic layer (interfaces + implementations)
+- `UI/` - Menu classes implementing IMenu
+- `Program.cs` - initialization 
 
 ## Build & run
 ```bash
@@ -99,4 +91,4 @@ dotnet run
 
 ## Notes
 - Application uses in-memory data stores, so data is not persisted across runs.
-- There are a small number of existing warnings for nullable initialization in `base.cs` (non-nullable properties/fields).
+
