@@ -13,7 +13,7 @@ StudentApp/
 │   ├── InMemoryCourseRepository.cs
 │   ├── IEnrollmentRepository.cs
 │   └── InMemoryEnrollmentRepository.cs
-├── Services/                  # Business logic layer
+├── Services/                  # logic layer
 │   ├── IStudentService.cs
 │   ├── StudentService.cs
 │   ├── ICourseService.cs
